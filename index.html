@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pickleball Pulse</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js?v=13"></script>
+  <script defer src="app.js?v=13"></script>
+</head>
+<body>
+  <div class="bg-orb orb-1"></div>
+  <div class="bg-orb orb-2"></div>
+
+  <main class="layout">
+    <header class="hero panel">
+      <p class="kicker">Community Sports Organizer</p>
+      <h1>Pickleball Pulse</h1>
+      <p class="hero-copy">
+        Collect availability votes, confirm when enough players commit, and track every event in one dashboard.
+      </p>
+    </header>
+
+    <section id="setupNotice" class="panel notice hidden">
+      <h2>One-time setup needed</h2>
+      <p>
+        Copy <strong>config.example.js</strong> to <strong>config.js</strong> and fill in your Supabase URL and anon key.
+      </p>
+    </section>
+
+    <section class="panel">
+      <div class="section-head">
+        <h2>Events and Voting</h2>
+        <button id="refreshBtn" class="ghost">Refresh</button>
+      </div>
+      <p id="feedback" class="feedback"></p>
+      <div id="eventsContainer" class="events-grid"></div>
+    </section>
+
+    <section class="panel">
+      <h2>Summary Table</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Start Time</th>
+              <th>End Time</th>
+              <th>Title</th>
+              <th>Number of Courts</th>
+              <th>Status</th>
+              <th>Available / Min</th>
+              <th>Signed Up Players</th>
+            </tr>
+          </thead>
+          <tbody id="dashboardTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel" id="adminAccessPanel">
+      <div class="section-head">
+        <h2>Admin Access</h2>
+        <button id="adminLogoutBtn" class="ghost hidden" type="button">Lock Admin View</button>
+      </div>
+      <p class="small" id="adminAccessStatus">Enter the admin code to show the create-event form.</p>
+      <div id="adminLoginForm" class="form-stack">
+        <label>
+          Admin Code
+          <input type="password" name="admin_code" placeholder="Enter admin code" />
+        </label>
+        <button id="adminUnlockBtn" type="button">Unlock Admin View</button>
+      </div>
+    </section>
+
+    <article class="panel hidden" id="adminCreatePanel">
+      <h2>Create Event</h2>
+      <form id="createEventForm" class="form-stack">
+        <label>
+          Event Title
+          <input name="title" required placeholder="Saturday Morning Doubles" />
+        </label>
+
+        <label>
+          Date
+          <input type="date" name="event_date" required />
+        </label>
+
+        <label>
+          Start Time
+          <input type="time" name="start_time" required />
+        </label>
+
+        <label>
+          End Time
+          <input type="time" name="end_time" required />
+        </label>
+
+        <label>
+          Number of Courts
+          <input type="number" min="1" name="number_of_courts" required placeholder="2" />
+        </label>
+
+        <label>
+          Minimum Players Needed
+          <input type="number" min="2" max="40" name="min_players" value="4" required />
+        </label>
+
+        <button id="createEventBtn" type="button">Create Event</button>
+      </form>
+    </article>
+
+  </main>
+</body>
+</html>
