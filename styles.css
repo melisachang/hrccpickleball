@@ -470,6 +470,7 @@ button.ghost {
 
 .table-wrap {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 table {
@@ -497,7 +498,21 @@ tr.past-event td {
   color: #7c2e3e;
 }
 
-@media (max-width: 760px) {
+@media (max-width: 1100px) {
+  .layout {
+    padding: 14px;
+  }
+
+  .hero h1 {
+    font-size: clamp(1.7rem, 4.6vw, 2.6rem);
+  }
+
+  .event-card:not(.condensed-past) > * {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 900px) {
   .events-grid {
     grid-template-columns: 1fr;
   }
@@ -507,17 +522,22 @@ tr.past-event td {
     grid-template-columns: 1fr;
   }
 
-  .layout {
-    padding: 10px;
+  .stats {
+    grid-template-columns: 1fr;
+  }
+
+  .section-head {
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .section-head h2 {
+    margin: 0;
   }
 
   .vote-inline-fields {
     align-items: stretch;
     flex-wrap: wrap;
-  }
-
-  .event-card:not(.condensed-past) > * {
-    max-width: 100%;
   }
 
   .vote-name-input {
@@ -527,10 +547,15 @@ tr.past-event td {
     flex: 1 1 100%;
   }
 
+  .booking-head {
+    align-items: stretch;
+  }
+
   .status-select {
-    min-width: 140px;
-    max-width: 140px;
-    width: 140px;
+    min-width: 0;
+    max-width: 100%;
+    width: 100%;
+    margin-left: 0;
   }
 
   .edit-grid {
@@ -540,8 +565,68 @@ tr.past-event td {
   .edit-actions {
     justify-content: flex-start;
   }
+}
+
+@media (max-width: 640px) {
+  .events-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .layout {
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .panel {
+    padding: 10px;
+    border-radius: 12px;
+  }
+
+  .hero h1 {
+    font-size: clamp(1.45rem, 7vw, 1.9rem);
+  }
+
+  .hero-copy {
+    font-size: 0.9rem;
+  }
+
+  .event-top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .meta {
+    font-size: 0.78rem;
+  }
+
+  .vote-inline-fields {
+    gap: 6px;
+  }
+
+  .vote-join-field {
+    font-size: 0.8rem;
+  }
 
   .vote-submit-btn {
-    padding: 6px 10px;
+    width: auto;
+    min-height: 34px;
+  }
+
+  .condensed-past {
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  .condensed-delete-btn {
+    margin-left: auto;
+  }
+
+  table {
+    font-size: 0.82rem;
+  }
+
+  th,
+  td {
+    padding: 7px 6px;
   }
 }
