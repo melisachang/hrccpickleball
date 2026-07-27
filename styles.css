@@ -15,6 +15,13 @@
 
 * {
   box-sizing: border-box;
+  min-width: 0;
+}
+
+html,
+body {
+  width: 100%;
+  max-width: 100%;
 }
 
 body {
@@ -471,6 +478,7 @@ button.ghost {
 .table-wrap {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  max-width: 100%;
 }
 
 table {
@@ -580,6 +588,7 @@ tr.past-event td {
   .panel {
     padding: 10px;
     border-radius: 12px;
+    max-width: 100%;
   }
 
   .hero h1 {
@@ -595,12 +604,24 @@ tr.past-event td {
     align-items: flex-start;
   }
 
+  .event-card {
+    max-width: 100%;
+  }
+
+  .event-card:not(.condensed-past) > * {
+    margin-right: 0;
+  }
+
   .meta {
     font-size: 0.78rem;
   }
 
   .vote-inline-fields {
     gap: 6px;
+  }
+
+  .vote-inline-fields > * {
+    max-width: 100%;
   }
 
   .vote-join-field {
@@ -628,5 +649,32 @@ tr.past-event td {
   th,
   td {
     padding: 7px 6px;
+  }
+}
+
+@media (max-width: 390px) {
+  .layout {
+    padding: 8px;
+  }
+
+  .panel {
+    padding: 8px;
+  }
+
+  .section-head {
+    gap: 6px;
+  }
+
+  .vote-submit-btn,
+  .status-select,
+  #refreshBtn,
+  #adminUnlockBtn,
+  #adminLogoutBtn,
+  #createEventBtn {
+    width: 100%;
+  }
+
+  .vote-join-field {
+    width: 100%;
   }
 }
