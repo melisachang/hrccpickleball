@@ -127,6 +127,12 @@ h2 {
   gap: 8px;
 }
 
+.form-stack[disabled],
+.form-stack[aria-disabled="true"] {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
 label {
   display: grid;
   gap: 4px;
@@ -253,6 +259,13 @@ button.ghost {
   background: rgba(47, 158, 120, 0.14);
   color: #1f6e53;
 }
+
+.badge.closed {
+  background: rgba(74, 98, 122, 0.14);
+  color: #2f3d4f;
+}
+
+
 
 .meta {
   display: flex;

@@ -10,7 +10,7 @@ create table if not exists public.events (
   end_time time not null,
   number_of_courts integer not null check (number_of_courts >= 1),
   min_players integer not null check (min_players >= 2),
-  status text not null default 'planned' check (status in ('planned', 'court_booked', 'cancelled')),
+  status text not null default 'planned' check (status in ('planned', 'court_booked', 'cancelled', 'closed', 'done')),
   created_at timestamptz not null default now()
 );
 

@@ -86,6 +86,7 @@ function badgeClass(status) {
   if (status === "cancelled") {
     return "cancelled";
   }
+
   return "planned";
 }
 
@@ -98,6 +99,9 @@ function statusLabel(status) {
   }
   if (status === "cancelled") {
     return "Cancelled";
+  }
+  if (status === "closed") {
+    return "Closed";
   }
   return "Open for Votes";
 }
@@ -197,6 +201,43 @@ async function updateEventStatus(eventId, status) {
   }
 }
 
+async function checkAndCloseEvent(eventId) {
+  if (!eventId) {
+    console.warn("checkAndCloseEvent called with no eventId");
+    return;
+  }
+
+  try {
+    console.log(`Fetching event ${eventId}...`);
+    const { data: event, error } = await supabaseClient
+      .from("events")
+      .select("id,status,number_of_courts,event_votes(is_available)")
+      .eq("id", eventId)
+      .single();
+
+    if (error) {
+      console.error("Query error:", error);
+      return;
+    }
+
+    console.log(`Event data:`, event);
+
+    if (event && event.status !== "closed" && event.status !== "done" && event.status !== "cancelled") {
+      const goingCount = (event.event_votes || []).filter((v) => v.is_available).length;
+      const capacity = event.number_of_courts * 8;
+      
+      console.log(`Event ${eventId}: ${goingCount} going, capacity ${capacity}`);
+
+      if (goingCount >= capacity) {
+        console.log(`Auto-closing event ${eventId} - at capacity`);
+        await updateEventStatus(eventId, "closed");
+      }
+    }
+  } catch (error) {
+    console.error("checkAndCloseEvent exception:", error);
+  }
+}
+
 async function updateEventDetails(eventId, payload) {
   const { error } = await supabaseClient.from("events").update(payload).eq("id", eventId);
   if (error) {
@@ -252,7 +293,7 @@ function renderStats(events) {
     <div class="stat-card"><p>Total Events</p><h3>${total}</h3></div>
     <div class="stat-card"><p>Open for Votes</p><h3>${open}</h3></div>
     <div class="stat-card"><p>Court Booked</p><h3>${booked}</h3></div>
-    <div class="stat-card"><p>Unique Available Players</p><h3>${players.size}</h3></div>
+    <div class="stat-card"><p>Unique Going Players</p><h3>${players.size}</h3></div>
   `;
 }
 
@@ -351,31 +392,23 @@ function buildEventCard(event) {
     </div>
 
     <div class="meta">
-      <span>Available: <strong>${available}</strong></span>
-      <span>Not Available: <strong>${unavailable}</strong></span>
-      <span>Minimum Needed: <strong>${event.min_players}</strong></span>
-      <span>${enoughPlayers ? "Enough players to book" : "Waiting for more players"}</span>
+      <span>Going: <strong>${available}</strong></span>
     </div>
 
     <div class="players-compact">
-      <p class="small players-preview"><strong>Available:</strong> ${previewNames(availableNames)}</p>
-      <p class="small players-preview"><strong>Not Available:</strong> ${previewNames(unavailableNames)}</p>
+      <p class="small players-preview"><strong>Going:</strong> ${previewNames(availableNames)}</p>
       <details class="players-details">
         <summary class="small">View full player list</summary>
         <div class="split compact-split">
           <div>
-            <p class="small">Available Players</p>
+            <p class="small">Going</p>
             <ul class="vote-list">${yesList || "<li>-</li>"}</ul>
-          </div>
-          <div>
-            <p class="small">Not Available</p>
-            <ul class="vote-list">${noList || "<li>-</li>"}</ul>
           </div>
         </div>
       </details>
     </div>
 
-    <form class="form-stack vote-form" data-event-id="${event.id}">
+    <form class="form-stack vote-form" data-event-id="${event.id}" ${event.status === "closed" ? 'disabled aria-disabled="true"' : ""}>
       <div class="vote-inline-fields">
         <input class="vote-name-input" name="player_name" maxlength="24" required placeholder="Your name" aria-label="Your name" />
         <label class="vote-join-field">
@@ -390,6 +423,7 @@ function buildEventCard(event) {
       <label class="small">${isAdminUnlocked() ? "Update Booking Status" : "Booking Status (admin only)"}</label>
       <select class="status-select" data-event-id="${event.id}" ${isAdminUnlocked() ? "" : 'disabled aria-disabled="true"'}>
         <option value="planned" ${event.status === "planned" ? "selected" : ""}>Open for Votes</option>
+        <option value="closed" ${event.status === "closed" ? "selected" : ""}>Closed</option>
         <option value="court_booked" ${event.status === "court_booked" ? "selected" : ""}>Court Booked</option>
         <option value="cancelled" ${event.status === "cancelled" ? "selected" : ""}>Cancelled</option>
       </select>
@@ -572,24 +606,48 @@ async function handleVoteSubmit(ev) {
   }
 
   ev.preventDefault();
+  console.log("Vote form submitted");
 
   const eventId = form.dataset.eventId;
   const formData = new FormData(form);
   const playerName = String(formData.get("player_name") || "").trim();
   const isAvailable = formData.get("is_available") === "on";
 
+  console.log(`Submitting vote: event=${eventId}, player=${playerName}, available=${isAvailable}`);
+
   if (!eventId || !playerName) {
     setFeedback("Player name is required.", true);
     return;
   }
 
+  // Check event status before allowing vote
   try {
+    const { data: event } = await supabaseClient
+      .from("events")
+      .select("status")
+      .eq("id", eventId)
+      .single();
+
+    if (event?.status === "closed") {
+      setFeedback("This event is full and closed to new votes.", true);
+      return;
+    }
+  } catch (error) {
+    console.warn("Could not check event status:", error);
+  }
+
+  try {
+    console.log(`Adding vote for event ${eventId}`);
     await addVote(eventId, playerName, isAvailable);
+    console.log(`Vote added, checking if should close...`);
+    await checkAndCloseEvent(eventId);
+    console.log(`Check complete, re-rendering...`);
     form.reset();
     setFeedback("Vote saved.");
     await renderAll();
   } catch (error) {
     setFeedback(`Could not save vote: ${error.message}`, true);
+    console.error("Vote submit error:", error);
   }
 }
 
