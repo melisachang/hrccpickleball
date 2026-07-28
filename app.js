@@ -429,6 +429,10 @@ function buildEventCard(event) {
       </select>
     </div>
 
+    ${event.status === "closed" ? `
+      <button type="button" class="ghost delete-event-btn" data-event-id="${event.id}">Delete Event</button>
+    ` : ""}
+
     ${isAdminUnlocked() ? `
       <form class="form-stack edit-event-form" data-event-id="${event.id}">
         <p class="small">Admin Edit Event</p>
